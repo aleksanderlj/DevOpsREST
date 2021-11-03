@@ -1,9 +1,5 @@
 import controller.UserController;
 import io.javalin.Javalin;
-import service.TestController;
-
-import java.io.File;
-import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {

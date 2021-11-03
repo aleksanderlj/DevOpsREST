@@ -1,20 +1,19 @@
 package model;
 
 import com.mongodb.BasicDBObject;
-import org.bson.types.ObjectId;
 
 public class User {
-    private ObjectId id;
+    private Long id;
     private String googleId;
     private String name;
 
     public User(){}
 
-    public ObjectId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

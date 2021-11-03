@@ -1,14 +1,9 @@
 package dao;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.InsertOneResult;
 import model.User;
 import mongo.SingleDinkleMan;
-import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -29,7 +24,6 @@ public class UserDAO {
     public List<User> getUsersByFilter(User user) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
-        MongoCollection<User> collection = db.getCollection("users", User.class);
         FindIterable<User> iterable = db.getCollection("users", User.class)
                 .find(user.asBasicDBObject());
 
@@ -41,15 +35,16 @@ public class UserDAO {
     public User getUserById(String id) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
-        MongoCollection<User> collection = db.getCollection("users", User.class);
         return db.getCollection("users", User.class)
-                .find(eq("_id", new ObjectId(id)))
+                .find(eq("_id", new Long(id)))
                 .first();
     }
 
-    public ObjectId insertUser(User user) throws UnknownHostException {
+    public Long insertUser(User user) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
-        InsertOneResult result = db.getCollection("users", User.class).insertOne(user);
-        return null;
+        Long id = CounterDAO.getNextSequenceValue("userid");
+        user.setId(id);
+        db.getCollection("users", User.class).insertOne(user);
+        return id;
     }
 }
