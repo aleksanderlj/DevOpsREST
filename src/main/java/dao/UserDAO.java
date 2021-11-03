@@ -25,7 +25,7 @@ public class UserDAO {
         MongoDatabase db = SingleDinkleMan.instance();
 
         FindIterable<User> iterable = db.getCollection("users", User.class)
-                .find(user.asBasicDBObject());
+                .find(user.asFilter());
 
         List<User> result = new ArrayList<>();
         iterable.forEach(doc -> result.add(doc));
@@ -37,6 +37,14 @@ public class UserDAO {
 
         return db.getCollection("users", User.class)
                 .find(eq("_id", new Long(id)))
+                .first();
+    }
+
+    public User getUserByUsername(String username) throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+
+        return db.getCollection("users", User.class)
+                .find(eq("username", username))
                 .first();
     }
 

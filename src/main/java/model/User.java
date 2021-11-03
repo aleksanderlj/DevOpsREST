@@ -5,7 +5,9 @@ import com.mongodb.BasicDBObject;
 public class User {
     private Long id;
     private String googleId;
-    private String name;
+    private String username;
+    private String password;
+    private String displayName;
 
     public User(){}
 
@@ -25,19 +27,36 @@ public class User {
         this.googleId = googleId;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public BasicDBObject asBasicDBObject(){
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public BasicDBObject asFilter(){
         BasicDBObject basicDBObject = new BasicDBObject();
-        if (getId() != null)        basicDBObject.append("_id", getId());
-        if (getGoogleId() != null)  basicDBObject.append("googleId", getGoogleId());
-        if (getName() != null)      basicDBObject.append("name", getName());
+        if (getId() != null)            basicDBObject.append("_id", getId());
+        if (getGoogleId() != null)      basicDBObject.append("googleId", getGoogleId());
+        if (getUsername() != null)      basicDBObject.append("username", getUsername());
+        if (getDisplayName() != null)   basicDBObject.append("displayName", getDisplayName());
         return basicDBObject;
     }
 }

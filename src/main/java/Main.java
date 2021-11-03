@@ -1,3 +1,4 @@
+import controller.JWTController;
 import controller.UserController;
 import io.javalin.Javalin;
 
@@ -9,5 +10,7 @@ public class Main {
         app.get("/user", UserController.fetchByQuery);
         app.get("/user/{id}", UserController.fetchById);
         app.post("/user/insert", UserController.insertUser);
+        app.post("/user/login", UserController.login);
+        app.post("/token/validate", JWTController.decode);
     }
 }
