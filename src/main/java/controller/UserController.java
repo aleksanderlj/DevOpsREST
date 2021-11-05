@@ -1,5 +1,9 @@
 package controller;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import dao.UserDAO;
 import exception.NotAuthorizedException;
 import io.javalin.http.Handler;
@@ -7,7 +11,9 @@ import jwt.JWTHandler;
 import jwt.PwdAuth;
 import model.LoginData;
 import model.User;
+import util.PropFile;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UserController {
@@ -39,6 +45,18 @@ public class UserController {
         ctx.json(id);
     };
 
+    public static Handler deleteUser = ctx -> {
+        UserDAO dao = UserDAO.instance();
+        long count = dao.deleteUser(ctx.pathParam("id"));
+        ctx.json(count);
+    };
+
+    public static Handler updateUser = ctx -> {
+        UserDAO dao = UserDAO.instance();
+        User user = ctx.bodyAsClass(User.class);
+        dao.updateUser(user);
+    };
+
     public static Handler login = ctx -> {
         LoginData data = ctx.bodyAsClass(LoginData.class);
         if(data.getUsername() == null || data.getPassword() == null){
@@ -51,6 +69,21 @@ public class UserController {
             ctx.json(JWTHandler.generateJwtToken(user));
         } else {
             throw new NotAuthorizedException("Wrong username or password");
+        }
+    };
+
+    public static Handler googleLogin = ctx -> {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(PropFile.getProperty("google-client-id")))
+                .build();
+
+        GoogleIdToken idToken = verifier.verify(ctx.body());
+        if(idToken != null){
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            System.out.println(payload.getSubject());
+            ctx.json(payload.getSubject());
+        } else {
+            throw new NotAuthorizedException("Invalid Google ID token");
         }
     };
 }

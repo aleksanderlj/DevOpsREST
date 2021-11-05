@@ -2,6 +2,7 @@ package dao;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import exception.InvalidPayloadException;
 import model.User;
 import mongo.SingleDinkleMan;
 
@@ -54,5 +55,22 @@ public class UserDAO {
         user.setId(id);
         db.getCollection("users", User.class).insertOne(user);
         return id;
+    }
+
+    public long deleteUser(String id) throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+        return db.getCollection("users", User.class)
+                .deleteOne(eq("_id", new Long(id)))
+                .getDeletedCount();
+    }
+
+    public void updateUser(User user) throws UnknownHostException, InvalidPayloadException {
+        if(user.getId() != null) {
+            MongoDatabase db = SingleDinkleMan.instance();
+            db.getCollection("users", User.class)
+                    .replaceOne(eq("_id", user.getId()), user);
+        } else {
+            throw new InvalidPayloadException("Missing ID");
+        }
     }
 }
