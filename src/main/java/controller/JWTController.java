@@ -1,7 +1,7 @@
 package controller;
 
 import io.javalin.http.Handler;
-import jwt.JWTHandler;
+import token.JWTHandler;
 
 public class JWTController {
     public static Handler decode = ctx ->{

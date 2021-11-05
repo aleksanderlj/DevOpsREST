@@ -1,4 +1,4 @@
-package jwt;
+package token;
 
 import io.jsonwebtoken.*;
 import model.User;
@@ -25,7 +25,7 @@ public class JWTHandler {
                 .compact();
     }
 
-    public static Key getKey() {
+    private static Key getKey() {
         if (key == null){
             String s = PropFile.getProperty("jwtkey");
             key = new SecretKeySpec(s.getBytes(StandardCharsets.UTF_8), 0, s.length(), "HS512");

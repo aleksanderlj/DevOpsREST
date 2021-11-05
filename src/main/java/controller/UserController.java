@@ -7,8 +7,8 @@ import com.google.api.client.json.gson.GsonFactory;
 import dao.UserDAO;
 import exception.NotAuthorizedException;
 import io.javalin.http.Handler;
-import jwt.JWTHandler;
-import jwt.PwdAuth;
+import token.JWTHandler;
+import token.PwdAuth;
 import model.LoginData;
 import model.User;
 import util.PropFile;
@@ -80,8 +80,11 @@ public class UserController {
         GoogleIdToken idToken = verifier.verify(ctx.body());
         if(idToken != null){
             GoogleIdToken.Payload payload = idToken.getPayload();
-            System.out.println(payload.getSubject());
-            ctx.json(payload.getSubject());
+            String googleId = payload.getSubject();
+            User user = UserDAO.instance().getUserByGoogleId(googleId);
+            if(user != null){
+                ctx.json(JWTHandler.generateJwtToken(user));
+            }
         } else {
             throw new NotAuthorizedException("Invalid Google ID token");
         }

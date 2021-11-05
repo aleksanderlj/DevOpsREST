@@ -41,6 +41,14 @@ public class UserDAO {
                 .first();
     }
 
+    public User getUserByGoogleId(String id) throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+
+        return db.getCollection("users", User.class)
+                .find(eq("googleId", id))
+                .first();
+    }
+
     public User getUserByUsername(String username) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
