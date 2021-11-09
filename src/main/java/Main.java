@@ -1,4 +1,5 @@
 import controller.JWTController;
+import controller.PostController;
 import controller.UserController;
 import io.javalin.Javalin;
 import io.javalin.core.util.Header;
@@ -19,5 +20,11 @@ public class Main {
         app.post("/user/login", UserController.login);
         app.post("/user/login/google", UserController.googleLogin);
         app.post("/token/validate", JWTController.decode);
+        app.get("/post", PostController.fetchAll );
+        app.get("/post/{id}", PostController.fetchById );
+        app.get("/user/{userId}/posts", PostController.fetchByUserId );
+        app.post("/post", PostController.insertPost );
+        app.delete("/post/{id}", PostController.deletePost);
+        app.patch("/post", PostController.updatePost);
     }
 }
