@@ -79,10 +79,17 @@ public class UserController {
 
         GoogleIdToken idToken = verifier.verify(ctx.body());
         if(idToken != null){
+            UserDAO dao = UserDAO.instance();
             GoogleIdToken.Payload payload = idToken.getPayload();
             String googleId = payload.getSubject();
-            User user = UserDAO.instance().getUserByGoogleId(googleId);
+            User user = dao.getUserByGoogleId(googleId);
             if(user != null){
+                ctx.json(JWTHandler.generateJwtToken(user));
+            } else {
+                user = new User();
+                user.setGoogleId(googleId);
+                user.setDisplayName((String)payload.get("name"));
+                Long id = dao.insertUser(user);
                 ctx.json(JWTHandler.generateJwtToken(user));
             }
         } else {
