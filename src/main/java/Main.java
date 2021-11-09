@@ -1,10 +1,15 @@
 import controller.JWTController;
 import controller.UserController;
 import io.javalin.Javalin;
+import io.javalin.core.util.Header;
 
 public class Main {
     public static void main(String[] args) {
         Javalin app = Javalin.create().start(5000);
+
+        app.before(ctx -> {
+            ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // TODO
+        });
 
         app.get("/user", UserController.fetchByQuery);
         app.get("/user/{id}", UserController.fetchById);
