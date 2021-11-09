@@ -8,6 +8,7 @@ public class Post {
     private String content;
     private Long userId;
     private Date postDate;
+    private String imageUrl;
 
     public Post() {}
 
@@ -39,7 +40,7 @@ public class Post {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -49,5 +50,13 @@ public class Post {
 
     public void setPostDate(Date postDate) {
         this.postDate = postDate;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
