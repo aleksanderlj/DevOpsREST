@@ -1,15 +1,24 @@
 import controller.JWTController;
 import controller.PostController;
 import controller.UserController;
+import exception.ExceptionHandling;
+import exception.InvalidPayloadException;
+import exception.NotAuthorizedException;
+import exception.ResourceConflictException;
 import io.javalin.Javalin;
 import io.javalin.core.util.Header;
+import io.jsonwebtoken.ExpiredJwtException;
 
 public class Main {
     public static void main(String[] args) {
-        Javalin app = Javalin.create().start(5000);
+        Javalin app = Javalin.create();
+        app._conf.enableCorsForAllOrigins();
+        app.start(5000);
 
         app.before(ctx -> {
             ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // TODO
+            ctx.header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "*"); // TODO
+            ctx.status(200); // Will be overwritten by exceptions
         });
 
         app.get("/user", UserController.fetchByQuery);
@@ -26,5 +35,10 @@ public class Main {
         app.post("/post", PostController.insertPost );
         app.delete("/post/{id}", PostController.deletePost);
         app.patch("/post", PostController.updatePost);
+
+        app.exception(NotAuthorizedException.class, ExceptionHandling.notAuthorized);
+        app.exception(InvalidPayloadException.class, ExceptionHandling.invalidPayload);
+        app.exception(ResourceConflictException.class, ExceptionHandling.resourceConflict);
+        app.exception(ExpiredJwtException.class, ExceptionHandling.expiredJwt);
     }
 }

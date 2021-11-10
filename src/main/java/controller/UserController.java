@@ -6,6 +6,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import dao.UserDAO;
 import exception.NotAuthorizedException;
+import exception.ResourceConflictException;
 import io.javalin.http.Handler;
 import token.JWTHandler;
 import token.PwdAuth;
@@ -13,8 +14,11 @@ import model.LoginData;
 import model.User;
 import util.PropFile;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class UserController {
     public static Handler fetchByQuery = ctx -> {
@@ -40,9 +44,27 @@ public class UserController {
     public static Handler insertUser = ctx -> {
         UserDAO dao = UserDAO.instance();
         User user = ctx.bodyAsClass(User.class);
+        user.setDisplayName(user.getUsername());
         user.setPassword(PwdAuth.hash(user.getPassword()));
+
+        // Check if user or displayname already exists
+        User existingUser = dao.getUserByUsername(user.getUsername());
+        if(existingUser != null) {
+            throw new ResourceConflictException("A user already exists with that username");
+        }
+        do {
+            existingUser = dao.getUserByDisplayName(user.getDisplayName());
+            if(existingUser != null){
+                byte[] array = new byte[7];
+                new Random().nextBytes(array);
+                String generatedString = new String(array, StandardCharsets.UTF_8);
+                user.setDisplayName(user.getDisplayName() + generatedString);
+            }
+        } while(existingUser != null);
+
         Long id = dao.insertUser(user);
-        ctx.json(id);
+        user.setId(id);
+        ctx.json(JWTHandler.generateJwtToken(user));
     };
 
     public static Handler deleteUser = ctx -> {
