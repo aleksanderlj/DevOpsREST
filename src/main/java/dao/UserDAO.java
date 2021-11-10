@@ -30,6 +30,7 @@ public class UserDAO {
 
         List<User> result = new ArrayList<>();
         iterable.forEach(doc -> result.add(doc));
+        System.out.println("The secret test print");
         return result;
     };
 
