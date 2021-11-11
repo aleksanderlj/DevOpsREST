@@ -1,13 +1,21 @@
 package dao;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Field;
 import exception.InvalidPayloadException;
 import model.Post;
 import mongo.SingleDinkleMan;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -33,9 +41,18 @@ public class PostDAO {
     public List<Post> getPosts() throws  UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
-        FindIterable<Post> iterable = db.getCollection("posts", Post.class).find();
+        AggregateIterable<Post> iterable = db.getCollection("posts", Post.class)
+                .aggregate(Arrays.asList(
+                        Aggregates.lookup(
+                                "likes",
+                                "_id",
+                                "postId",
+                                "likeCount"
+                        ),
+                        Aggregates.addFields(new Field("likeCount", new BasicDBObject("$size", "$likeCount")))
+                ));
 
-        List<Post> result = new ArrayList<Post>();
+        List<Post> result = new ArrayList<>();
         iterable.forEach(doc -> result.add(doc));
         return result;
     }

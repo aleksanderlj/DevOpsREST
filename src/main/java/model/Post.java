@@ -1,5 +1,7 @@
 package model;
 
+import org.bson.codecs.pojo.annotations.BsonIgnore;
+
 import java.util.Date;
 
 public class Post {
@@ -9,6 +11,7 @@ public class Post {
     private Long userId;
     private Date postDate;
     private String imageUrl;
+    private int likeCount;
 
     public Post() {}
 
@@ -59,4 +62,9 @@ public class Post {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    @BsonIgnore // Makes likeCount only show on output
+    public int getLikeCount() {return likeCount;}
+
+    public void setLikeCount(int likeCount) {this.likeCount = likeCount;}
 }

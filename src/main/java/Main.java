@@ -1,4 +1,5 @@
 import controller.JWTController;
+import controller.LikeController;
 import controller.PostController;
 import controller.UserController;
 import exception.ExceptionHandling;
@@ -8,6 +9,8 @@ import exception.ResourceConflictException;
 import io.javalin.Javalin;
 import io.javalin.core.util.Header;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 
 public class Main {
     public static void main(String[] args) {
@@ -29,6 +32,7 @@ public class Main {
         app.post("/user/login", UserController.login);
         app.post("/user/login/google", UserController.googleLogin);
         app.post("/token/validate", JWTController.decode);
+
         app.get("/post", PostController.fetchAll );
         app.get("/post/{id}", PostController.fetchById );
         app.get("/user/{userId}/posts", PostController.fetchByUserId );
@@ -36,9 +40,15 @@ public class Main {
         app.delete("/post/{id}", PostController.deletePost);
         app.patch("/post", PostController.updatePost);
 
+        app.post("/post/{id}/like", LikeController.likePost);
+        app.get("/post/{id}/like", LikeController.getPostLikeCount);
+
+        app.exception(MalformedJwtException.class, ExceptionHandling.notAuthorized);
+        app.exception(SignatureException.class, ExceptionHandling.notAuthorized);
         app.exception(NotAuthorizedException.class, ExceptionHandling.notAuthorized);
         app.exception(InvalidPayloadException.class, ExceptionHandling.invalidPayload);
         app.exception(ResourceConflictException.class, ExceptionHandling.resourceConflict);
         app.exception(ExpiredJwtException.class, ExceptionHandling.expiredJwt);
+        app.exception(Exception.class, ExceptionHandling.generic);
     }
 }
