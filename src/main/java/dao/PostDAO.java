@@ -34,7 +34,17 @@ public class PostDAO {
         MongoDatabase db = SingleDinkleMan.instance();
 
         return db.getCollection("posts", Post.class)
-                .find(eq("_id", new Long(id)))
+                .aggregate(Arrays.asList(
+                        Aggregates.match(eq("_id", new Long(id))
+                        ),
+                        Aggregates.lookup(
+                                "likes",
+                                "_id",
+                                "postId",
+                                "likeCount"
+                        ),
+                        Aggregates.addFields(new Field("likeCount", new BasicDBObject("$size", "$likeCount")))
+                        ))
                 .first();
     }
 
@@ -60,7 +70,18 @@ public class PostDAO {
     public List<Post> getPostsByUserId(String id) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
-        FindIterable<Post> iterable = db.getCollection("posts", Post.class).find(eq("userId", new Long(id)));
+        AggregateIterable<Post> iterable = db.getCollection("posts", Post.class)
+                .aggregate(Arrays.asList(
+                        Aggregates.match(eq("userId", new Long(id))
+                        ),
+                        Aggregates.lookup(
+                                "likes",
+                                "_id",
+                                "postId",
+                                "likeCount"
+                        ),
+                        Aggregates.addFields(new Field("likeCount", new BasicDBObject("$size", "$likeCount")))
+                ));
 
         List<Post> result = new ArrayList<Post>();
         iterable.forEach(doc -> result.add(doc));
