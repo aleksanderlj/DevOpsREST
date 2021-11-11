@@ -41,6 +41,8 @@ public class Main {
         app.patch("/post", PostController.updatePost);
 
         app.post("/post/{id}/like", LikeController.likePost);
+        app.post("/post/{id}/unlike", LikeController.unlikePost);
+        app.get("/post/{id}/likestatus", LikeController.getLikeStatus);
         app.get("/post/{id}/like", LikeController.getPostLikeCount);
 
         app.exception(MalformedJwtException.class, ExceptionHandling.notAuthorized);
