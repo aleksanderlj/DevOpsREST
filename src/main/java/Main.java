@@ -11,9 +11,20 @@ import io.javalin.core.util.Header;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
+import io.sentry.Sentry;
 
 public class Main {
+
     public static void main(String[] args) {
+        Sentry.init(options -> {
+            options.setDsn("https://d6bf751465cc41eeaeb72dfc391ef6c9@o472376.ingest.sentry.io/6066145");
+            // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+            // We recommend adjusting this value in production.
+            options.setTracesSampleRate(1.0);
+            // When first trying Sentry it's good to see what the SDK is doing:
+            options.setDebug(true);
+        });
+
         Javalin app = Javalin.create();
         app._conf.enableCorsForAllOrigins();
         app.start(5000);

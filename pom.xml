@@ -78,5 +78,10 @@
             <artifactId>google-api-client</artifactId>
             <version>1.32.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry</artifactId>
+            <version>5.4.0</version>
+        </dependency>
     </dependencies>
 </project>
