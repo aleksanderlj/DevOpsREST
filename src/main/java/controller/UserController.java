@@ -8,19 +8,22 @@ import dao.UserDAO;
 import exception.NotAuthorizedException;
 import exception.ResourceConflictException;
 import io.javalin.http.Handler;
+import io.prometheus.client.Counter;
 import token.JWTHandler;
 import token.PwdAuth;
 import model.LoginData;
 import model.User;
 import util.PropFile;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class UserController {
+    public static Counter attempts = Counter.build().name("login_attemps").help("Total login attempts").register();
+    public static Counter fails = Counter.build().name("login_failures").help("Total login failures").register();
+
     public static Handler fetchByQuery = ctx -> {
         UserDAO dao = UserDAO.instance();
 
@@ -80,42 +83,54 @@ public class UserController {
     };
 
     public static Handler login = ctx -> {
-        LoginData data = ctx.bodyAsClass(LoginData.class);
-        if(data.getUsername() == null || data.getPassword() == null){
-            throw new NotAuthorizedException("Empty username or password");
-        }
+        try {
+            attempts.inc();
+            LoginData data = ctx.bodyAsClass(LoginData.class);
+            if (data.getUsername() == null || data.getPassword() == null) {
+                throw new NotAuthorizedException("Empty username or password");
+            }
 
-        UserDAO dao = UserDAO.instance();
-        User user = dao.getUserByUsername(data.getUsername());
-        if(user != null && PwdAuth.verify(data.getPassword(), user.getPassword())){
-            ctx.json(JWTHandler.generateJwtToken(user));
-        } else {
-            throw new NotAuthorizedException("Wrong username or password");
+            UserDAO dao = UserDAO.instance();
+            User user = dao.getUserByUsername(data.getUsername());
+            if (user != null && PwdAuth.verify(data.getPassword(), user.getPassword())) {
+                ctx.json(JWTHandler.generateJwtToken(user));
+            } else {
+                throw new NotAuthorizedException("Wrong username or password");
+            }
+        } catch(Exception e){
+            fails.inc();
+            throw e;
         }
     };
 
     public static Handler googleLogin = ctx -> {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(Collections.singletonList(PropFile.getProperty("google-client-id")))
-                .build();
+        try {
+            attempts.inc();
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(PropFile.getProperty("google-client-id")))
+                    .build();
 
-        GoogleIdToken idToken = verifier.verify(ctx.body());
-        if(idToken != null){
-            UserDAO dao = UserDAO.instance();
-            GoogleIdToken.Payload payload = idToken.getPayload();
-            String googleId = payload.getSubject();
-            User user = dao.getUserByGoogleId(googleId);
-            if(user != null){
-                ctx.json(JWTHandler.generateJwtToken(user));
+            GoogleIdToken idToken = verifier.verify(ctx.body());
+            if (idToken != null) {
+                UserDAO dao = UserDAO.instance();
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                String googleId = payload.getSubject();
+                User user = dao.getUserByGoogleId(googleId);
+                if (user != null) {
+                    ctx.json(JWTHandler.generateJwtToken(user));
+                } else {
+                    user = new User();
+                    user.setGoogleId(googleId);
+                    user.setDisplayName((String) payload.get("name"));
+                    Long id = dao.insertUser(user);
+                    ctx.json(JWTHandler.generateJwtToken(user));
+                }
             } else {
-                user = new User();
-                user.setGoogleId(googleId);
-                user.setDisplayName((String)payload.get("name"));
-                Long id = dao.insertUser(user);
-                ctx.json(JWTHandler.generateJwtToken(user));
+                throw new NotAuthorizedException("Invalid Google ID token");
             }
-        } else {
-            throw new NotAuthorizedException("Invalid Google ID token");
+        } catch (Exception e){
+            fails.inc();
+            throw e;
         }
     };
 }

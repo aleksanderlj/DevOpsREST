@@ -11,11 +11,15 @@ import io.javalin.core.util.Header;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
+import io.prometheus.client.exporter.HTTPServer;
 import io.sentry.Sentry;
+
+import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        // Sentry
         Sentry.init(options -> {
             options.setDsn("https://d6bf751465cc41eeaeb72dfc391ef6c9@o472376.ingest.sentry.io/6066145");
             // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
@@ -25,6 +29,10 @@ public class Main {
             options.setDebug(true);
         });
 
+        // Prometheus
+        HTTPServer prometheusServer = new HTTPServer(5010);
+
+        // Javalin
         Javalin app = Javalin.create();
         app._conf.enableCorsForAllOrigins();
         app.start(5000);
