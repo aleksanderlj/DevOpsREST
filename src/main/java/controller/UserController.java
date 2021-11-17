@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 public class UserController {
-    public static Counter attempts = Counter.build().name("login_attemps").help("Total login attempts").register();
+    public static Counter attempts = Counter.build().name("login_attempts").help("Total login attempts").register();
     public static Counter fails = Counter.build().name("login_failures").help("Total login failures").register();
 
     public static Handler fetchByQuery = ctx -> {
