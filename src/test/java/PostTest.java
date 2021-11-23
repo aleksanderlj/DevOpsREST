@@ -21,10 +21,10 @@ public class PostTest {
         post.setPostDate(new Date(2020, Calendar.FEBRUARY, 1));
         post.setUserId(2L);
 
-        HttpUriRequest request = new HttpGet("localhost:5000");
+        HttpUriRequest request = new HttpGet("http://localhost:5000/post/1");
         HttpResponse response = HttpClientBuilder.create().build().execute( request );
 
-        //Post
+        Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
         Assert.assertEquals("Goddag", post.getTitle());
     }
