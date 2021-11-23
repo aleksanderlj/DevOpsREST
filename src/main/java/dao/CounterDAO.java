@@ -1,7 +1,9 @@
 package dao;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import model.Counter;
 import mongo.SingleDinkleMan;
 import org.bson.Document;
 
@@ -26,5 +28,13 @@ public class CounterDAO {
         Document doc = db.getCollection("counters")
                 .findOneAndUpdate(eq("_id", seq), update);
         return doc != null ? doc.getLong("sequence_value") : null;
+    }
+
+    public static void initiateCounters() throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+        MongoCollection<Counter> collection = db.getCollection("counters", Counter.class);
+        collection.insertOne(new Counter("postid", 1L));
+        collection.insertOne(new Counter("userid", 1L));
+        collection.insertOne(new Counter("likeid", 1L));
     }
 }

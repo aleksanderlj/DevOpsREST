@@ -1,4 +1,4 @@
-FROM maven:3-openjdk-11
+FROM maven:3.8.3-openjdk-8
 
 COPY . .
 

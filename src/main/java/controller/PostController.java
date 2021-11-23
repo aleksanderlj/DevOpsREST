@@ -3,6 +3,7 @@ import dao.PostDAO;
 import io.javalin.http.Handler;
 import model.Post;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class PostController {
@@ -18,6 +19,7 @@ public class PostController {
     public static Handler fetchAll = ctx -> {
         PostDAO dao = PostDAO.instance();
         List<Post> posts = dao.getPosts();
+        posts.sort(Comparator.comparing(Post::getPostDate).reversed());
         ctx.json(posts);
     };
 

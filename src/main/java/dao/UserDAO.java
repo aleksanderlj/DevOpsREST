@@ -57,6 +57,14 @@ public class UserDAO {
                 .first();
     }
 
+    public User getUserByDisplayName(String displayName) throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+
+        return db.getCollection("users", User.class)
+                .find(eq("displayName", displayName))
+                .first();
+    }
+
     public Long insertUser(User user) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
         Long id = CounterDAO.getNextSequenceValue("userid");
