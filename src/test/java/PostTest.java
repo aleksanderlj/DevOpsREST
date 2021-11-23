@@ -1,8 +1,12 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import model.Post;
+import util.DateTypeAdapter;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,6 +18,9 @@ public class PostTest {
 
     @Test
     public void insertPost() throws IOException {
+        DateTypeAdapter myAdapter = new DateTypeAdapter();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, myAdapter).create();
+
         Post post = new Post();
         post.setTitle("Goddag");
         post.setContent("Hello my friend");
@@ -26,6 +33,8 @@ public class PostTest {
 
         Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
-        Assert.assertEquals("Goddag", post.getTitle());
+        Post responsePost = gson.fromJson(EntityUtils.toString(response.getEntity()), Post.class);
+
+        Assert.assertEquals(post.getTitle(), responsePost.getTitle());
     }
 }
