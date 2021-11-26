@@ -9,12 +9,14 @@ import java.util.List;
 
 public class PostController {
     public static Counter posted = Counter.build().name("post_activity").help("Total post upload activity").register();
+    public static Counter postClick = Counter.build().name("post_click").help("Total post click activity").register();
 
     public static Handler fetchById = ctx -> {
         PostDAO dao = PostDAO.instance();
 
         Post post = dao.getPostById(ctx.pathParam("id"));
         if (post != null) {
+            postClick.inc();
             ctx.json(post);
         }
         ctx.status(200);
