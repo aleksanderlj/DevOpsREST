@@ -11,7 +11,9 @@ docker-compose build
 
     stage('Test') {
       steps {
-        echo 'Test here'
+        sh '''#!/bin/bash
+        mvn test
+        '''
       }
     }
 
