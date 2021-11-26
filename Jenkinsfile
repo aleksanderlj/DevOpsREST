@@ -12,6 +12,8 @@ docker-compose build
     stage('Test') {
       steps {
         sh '''#!/bin/bash
+        export M2_HOME=/home/s185118/maven/apache-maven-3.8.4
+        export PATH=$PATH:$M2_HOME/bin
         mvn test
         '''
       }
