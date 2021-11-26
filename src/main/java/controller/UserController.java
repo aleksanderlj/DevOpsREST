@@ -35,6 +35,7 @@ public class UserController {
 
         List<User> user = dao.getUsersByFilter(filter);
         ctx.json(user);
+        ctx.status(200);
     };
 
     public static Handler fetchById = ctx -> {
@@ -42,6 +43,7 @@ public class UserController {
         User user = dao.getUserById(ctx.pathParam("id"));
         if(user != null)
             ctx.json(user);
+        ctx.status(200);
     };
 
     public static Handler insertUser = ctx -> {
@@ -68,18 +70,24 @@ public class UserController {
         Long id = dao.insertUser(user);
         user.setId(id);
         ctx.json(JWTHandler.generateJwtToken(user));
+        ctx.status(200);
     };
 
     public static Handler deleteUser = ctx -> {
         UserDAO dao = UserDAO.instance();
         long count = dao.deleteUser(ctx.pathParam("id"));
         ctx.json(count);
+        ctx.status(200);
     };
 
     public static Handler updateUser = ctx -> {
         UserDAO dao = UserDAO.instance();
         User user = ctx.bodyAsClass(User.class);
+        if(user.getPassword() != null){
+            user.setPassword(PwdAuth.hash(user.getPassword()));
+        }
         dao.updateUser(user);
+        ctx.status(200);
     };
 
     public static Handler login = ctx -> {
@@ -101,6 +109,7 @@ public class UserController {
             fails.inc();
             throw e;
         }
+        ctx.status(200);
     };
 
     public static Handler googleLogin = ctx -> {
@@ -132,5 +141,6 @@ public class UserController {
             fails.inc();
             throw e;
         }
+        ctx.status(200);
     };
 }

@@ -12,6 +12,7 @@ public class LikeController {
         LikeDAO dao = LikeDAO.instance();
         boolean success = dao.likePost(postId, userId);
         ctx.json(success);
+        ctx.status(200);
     };
 
     public static Handler unlikePost = ctx -> {
@@ -21,12 +22,14 @@ public class LikeController {
         LikeDAO dao = LikeDAO.instance();
         boolean success = dao.unlikePost(postId, userId);
         ctx.json(success);
+        ctx.status(200);
     };
 
     public static Handler getPostLikeCount = ctx -> {
         Long postId = new Long(ctx.pathParam("id"));
         LikeDAO dao = LikeDAO.instance();
         ctx.json(dao.getPostLikeCount(postId));
+        ctx.status(200);
     };
 
     public static Handler getLikeStatus = ctx -> {
@@ -36,5 +39,6 @@ public class LikeController {
         LikeDAO dao = LikeDAO.instance();
         boolean status = dao.likeStatus(postId, userId);
         ctx.json(status);
+        ctx.status(200);
     };
 }

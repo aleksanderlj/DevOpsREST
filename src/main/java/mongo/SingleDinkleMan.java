@@ -23,7 +23,7 @@ public class SingleDinkleMan {
             mongoClient = MongoClients.create(URI);
         }
 
-        return mongoClient.getDatabase("downvoted")
+        return mongoClient.getDatabase(PropFile.getProperty("mongo-env"))
                 .withCodecRegistry(getPOJOCodecRegistry());
     }
 

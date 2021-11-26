@@ -33,9 +33,13 @@ public class Main {
         HTTPServer prometheusServer = new HTTPServer(5010);
 
         // Javalin
+        initializeJavalin(5000);
+    }
+
+    public static void initializeJavalin(int port){
         Javalin app = Javalin.create();
         app._conf.enableCorsForAllOrigins();
-        app.start(5000);
+        app.start(port);
 
         app.before(ctx -> {
             ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // TODO

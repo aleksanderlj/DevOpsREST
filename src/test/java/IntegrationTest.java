@@ -1,20 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
-import controller.JWTController;
-import controller.LikeController;
-import controller.PostController;
-import controller.UserController;
-import exception.ExceptionHandling;
-import exception.InvalidPayloadException;
-import exception.NotAuthorizedException;
-import exception.ResourceConflictException;
-import io.javalin.Javalin;
-import io.javalin.core.util.Header;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
+import model.LoginData;
 import model.Post;
 import model.User;
 import org.apache.http.client.methods.*;
@@ -22,7 +9,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.bson.json.JsonObject;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import util.DateTypeAdapter;
 import org.apache.http.HttpResponse;
@@ -32,13 +18,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 public class IntegrationTest {
+    private static final int PORT = 5001;
 
     @Test
     public void integrationPostTest() throws IOException {
@@ -62,7 +47,7 @@ public class IntegrationTest {
         updatePost.setUserId(2L);
 
         /* POST */
-        HttpPost postRequest = new HttpPost("http://localhost:5000/post");
+        HttpPost postRequest = new HttpPost("http://localhost:"+ PORT +"/post");
         String postJson = gson.toJson(postPost);
         StringEntity postEntity = new StringEntity(postJson);
         postRequest.setEntity(postEntity);
@@ -73,7 +58,7 @@ public class IntegrationTest {
 
         /* GET ID */
         final String postId = EntityUtils.toString(postResponse.getEntity());
-        HttpUriRequest getRequest1 = new HttpGet("http://localhost:5000/post/" + postId);
+        HttpUriRequest getRequest1 = new HttpGet("http://localhost:"+ PORT +"/post/" + postId);
         HttpResponse getResponse1 = HttpClientBuilder.create().build().execute( getRequest1 );
 
         Assert.assertEquals(200, getResponse1.getStatusLine().getStatusCode());
@@ -82,7 +67,7 @@ public class IntegrationTest {
 
         /* UPDATE */
         updatePost.setId(Long.parseLong(postId));
-        HttpPatch updateRequest = new HttpPatch("http://localhost:5000/post");
+        HttpPatch updateRequest = new HttpPatch("http://localhost:"+ PORT +"/post");
         String updateJson = gson.toJson(updatePost);
         StringEntity updateEntity = new StringEntity(updateJson);
         updateRequest.setEntity(updateEntity);
@@ -91,7 +76,7 @@ public class IntegrationTest {
         Assert.assertEquals(200, updateResponse.getStatusLine().getStatusCode());
 
         // Get to check post got updated
-        HttpUriRequest getRequest2 = new HttpGet("http://localhost:5000/post/" + postId);
+        HttpUriRequest getRequest2 = new HttpGet("http://localhost:"+ PORT +"/post/" + postId);
         HttpResponse getResponse2 = HttpClientBuilder.create().build().execute( getRequest2 );
 
         Assert.assertEquals(200, getResponse2.getStatusLine().getStatusCode());
@@ -99,7 +84,7 @@ public class IntegrationTest {
         Assert.assertEquals(updatePost.getTitle(), responsePost2.getTitle());
 
         /* GET ALL */
-        HttpUriRequest getAllRequest = new HttpGet("http://localhost:5000/post");
+        HttpUriRequest getAllRequest = new HttpGet("http://localhost:"+ PORT +"/post");
         HttpResponse getAllResponse = HttpClientBuilder.create().build().execute( getAllRequest );
 
         Assert.assertEquals(200, getAllResponse.getStatusLine().getStatusCode());
@@ -107,7 +92,7 @@ public class IntegrationTest {
         Assert.assertTrue(responseAllPost.size() > 0);
 
         /* DELETE */
-        HttpDelete deleteRequest = new HttpDelete("http://localhost:5000/post/" + postId);
+        HttpDelete deleteRequest = new HttpDelete("http://localhost:"+ PORT +"/post/" + postId);
         HttpResponse deleteResponse = HttpClientBuilder.create().build().execute( deleteRequest );
 
         Assert.assertEquals(200, deleteResponse.getStatusLine().getStatusCode());
@@ -131,7 +116,7 @@ public class IntegrationTest {
         updateUser.setPassword("General");
 
         /* POST */
-        HttpPost postRequest = new HttpPost("http://localhost:5000/user");
+        HttpPost postRequest = new HttpPost("http://localhost:"+ PORT +"/user");
         String postJson = gson.toJson(postUser);
         StringEntity postEntity = new StringEntity(postJson);
         postRequest.setEntity(postEntity);
@@ -139,13 +124,16 @@ public class IntegrationTest {
         CloseableHttpResponse postResponse = client.execute(postRequest);
         Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
 
-
-        HttpPost postTokenRequest = new HttpPost("http://localhost:5000/token/validate/");
+        HttpPost postTokenRequest = new HttpPost("http://localhost:"+ PORT +"/token/validate/");
         StringEntity postTokenEntity = new StringEntity(EntityUtils.toString(postResponse.getEntity()));
         postTokenRequest.setEntity(postTokenEntity);
 
         CloseableHttpResponse postTokenResponse = client.execute(postTokenRequest);
         Assert.assertEquals(200, postTokenResponse.getStatusLine().getStatusCode());
+
+        /* POST user already exists */
+        postResponse = client.execute(postRequest);
+        Assert.assertEquals(422, postResponse.getStatusLine().getStatusCode());
 
         /* GET ID */
         String hej = EntityUtils.toString(postTokenResponse.getEntity());
@@ -153,7 +141,7 @@ public class IntegrationTest {
         String userId = Long.toString(hehe.toBsonDocument().get("body").asDocument().getInt32("id").getValue());
 
         System.out.println(userId);
-        HttpUriRequest getRequest1 = new HttpGet("http://localhost:5000/user/" + userId);
+        HttpUriRequest getRequest1 = new HttpGet("http://localhost:"+ PORT +"/user/" + userId);
         HttpResponse getResponse1 = HttpClientBuilder.create().build().execute( getRequest1 );
 
         Assert.assertEquals(200, getResponse1.getStatusLine().getStatusCode());
@@ -162,7 +150,7 @@ public class IntegrationTest {
 
         /* UPDATE */
         updateUser.setId(Long.parseLong(userId));
-        HttpPatch updateRequest = new HttpPatch("http://localhost:5000/user");
+        HttpPatch updateRequest = new HttpPatch("http://localhost:"+ PORT +"/user");
         String updateJson = gson.toJson(updateUser);
         StringEntity updateEntity = new StringEntity(updateJson);
         updateRequest.setEntity(updateEntity);
@@ -170,8 +158,14 @@ public class IntegrationTest {
         CloseableHttpResponse updateResponse = client.execute(updateRequest);
         Assert.assertEquals(200, updateResponse.getStatusLine().getStatusCode());
 
+        /* UPDATE invalidpayload */
+        updateUser.setId(null);
+        updateRequest.setEntity(new StringEntity(gson.toJson(updateUser)));
+        updateResponse = client.execute(updateRequest);
+        Assert.assertEquals(400, updateResponse.getStatusLine().getStatusCode());
+
         // Get to check post got updated
-        HttpUriRequest getRequest2 = new HttpGet("http://localhost:5000/user/" + userId);
+        HttpUriRequest getRequest2 = new HttpGet("http://localhost:"+ PORT +"/user/" + userId);
         HttpResponse getResponse2 = HttpClientBuilder.create().build().execute( getRequest2 );
 
         Assert.assertEquals(200, getResponse2.getStatusLine().getStatusCode());
@@ -179,15 +173,34 @@ public class IntegrationTest {
         Assert.assertEquals(updateUser.getUsername(), responsePost2.getUsername());
 
         /* GET ALL */
-        HttpUriRequest getAllRequest = new HttpGet("http://localhost:5000/user");
+        HttpUriRequest getAllRequest = new HttpGet("http://localhost:"+ PORT +"/user");
         HttpResponse getAllResponse = HttpClientBuilder.create().build().execute( getAllRequest );
 
         Assert.assertEquals(200, getAllResponse.getStatusLine().getStatusCode());
-        List<User> responseAllPost = gson.fromJson(EntityUtils.toString(getAllResponse.getEntity()), new TypeToken<List<Post>>(){}.getType());
-        Assert.assertTrue(responseAllPost.size() > 0);
+        List<User> responseAllUser = gson.fromJson(EntityUtils.toString(getAllResponse.getEntity()), new TypeToken<List<User>>(){}.getType());
+        Assert.assertTrue(responseAllUser.size() > 0);
+
+        /* LOGIN success */
+        HttpPost loginRequest = new HttpPost("http://localhost:"+ PORT +"/user/login");
+        LoginData loginData = new LoginData();
+        loginData.setUsername(updateUser.getUsername());
+        loginData.setPassword(updateUser.getPassword());
+        String loginJson = gson.toJson(loginData);
+        loginRequest.setEntity(new StringEntity(loginJson));
+        HttpResponse loginResponse = HttpClientBuilder.create().build().execute( loginRequest );
+        Assert.assertEquals(200, loginResponse.getStatusLine().getStatusCode());
+
+        /* LOGIN fail */
+        loginRequest = new HttpPost("http://localhost:"+ PORT +"/user/login");
+        loginData.setUsername(updateUser.getUsername());
+        loginData.setPassword("oogabooga");
+        loginJson = gson.toJson(loginData);
+        loginRequest.setEntity(new StringEntity(loginJson));
+        loginResponse = HttpClientBuilder.create().build().execute( loginRequest );
+        Assert.assertEquals(401, loginResponse.getStatusLine().getStatusCode());
 
         /* DELETE */
-        HttpDelete deleteRequest = new HttpDelete("http://localhost:5000/user/" + userId);
+        HttpDelete deleteRequest = new HttpDelete("http://localhost:"+ PORT +"/user/" + userId);
         HttpResponse deleteResponse = HttpClientBuilder.create().build().execute( deleteRequest );
 
         Assert.assertEquals(200, deleteResponse.getStatusLine().getStatusCode());
@@ -197,44 +210,6 @@ public class IntegrationTest {
 
     @BeforeClass
     public static void initializeJavalin() {
-        // Javalin
-        Javalin app = Javalin.create();
-        app._conf.enableCorsForAllOrigins();
-        app.start(5000);
-
-        app.before(ctx -> {
-            ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // TODO
-            ctx.header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "*"); // TODO
-            ctx.status(200); // Will be overwritten by exceptions
-        });
-
-        app.get("/user", UserController.fetchByQuery);
-        app.get("/user/{id}", UserController.fetchById);
-        app.post("/user", UserController.insertUser);
-        app.delete("/user/{id}", UserController.deleteUser);
-        app.patch("/user", UserController.updateUser);
-        app.post("/user/login", UserController.login);
-        app.post("/user/login/google", UserController.googleLogin);
-        app.post("/token/validate", JWTController.decode);
-
-        app.get("/post", PostController.fetchAll );
-        app.get("/post/{id}", PostController.fetchById );
-        app.get("/user/{userId}/posts", PostController.fetchByUserId );
-        app.post("/post", PostController.insertPost );
-        app.delete("/post/{id}", PostController.deletePost);
-        app.patch("/post", PostController.updatePost);
-
-        app.post("/post/{id}/like", LikeController.likePost);
-        app.post("/post/{id}/unlike", LikeController.unlikePost);
-        app.get("/post/{id}/likestatus", LikeController.getLikeStatus);
-        app.get("/post/{id}/like", LikeController.getPostLikeCount);
-
-        app.exception(MalformedJwtException.class, ExceptionHandling.notAuthorized);
-        app.exception(SignatureException.class, ExceptionHandling.notAuthorized);
-        app.exception(NotAuthorizedException.class, ExceptionHandling.notAuthorized);
-        app.exception(InvalidPayloadException.class, ExceptionHandling.invalidPayload);
-        app.exception(ResourceConflictException.class, ExceptionHandling.resourceConflict);
-        app.exception(ExpiredJwtException.class, ExceptionHandling.expiredJwt);
-        app.exception(Exception.class, ExceptionHandling.generic);
+        Main.initializeJavalin(PORT);
     }
 }

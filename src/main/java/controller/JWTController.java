@@ -6,5 +6,6 @@ import token.JWTHandler;
 public class JWTController {
     public static Handler decode = ctx ->{
         ctx.json(JWTHandler.validateAndDecode(ctx.body()));
+        ctx.status(200);
     };
 }
