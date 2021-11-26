@@ -1,12 +1,15 @@
 package controller;
 import dao.PostDAO;
 import io.javalin.http.Handler;
+import io.prometheus.client.Counter;
 import model.Post;
 
 import java.util.Comparator;
 import java.util.List;
 
 public class PostController {
+    public static Counter posted = Counter.build().name("post_activity").help("Total post upload activity").register();
+
     public static Handler fetchById = ctx -> {
         PostDAO dao = PostDAO.instance();
 
@@ -36,6 +39,7 @@ public class PostController {
         PostDAO dao = PostDAO.instance();
         Post post = ctx.bodyAsClass(Post.class);
         Long id = dao.insertPost(post);
+        posted.inc();
         ctx.json(id);
         ctx.status(200);
     };
