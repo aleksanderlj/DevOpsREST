@@ -23,7 +23,7 @@ docker-compose build
       steps {
         sh '''#!/bin/bash
 docker push amtoft/devops_rest_app
-sudo caprover deploy -i amtoft/devops_rest_app -a rest -n captain-01 -p jonatandahl'''
+caprover deploy -i amtoft/devops_rest_app -a rest -n captain-01 -p jonatandahl'''
       }
     }
 
