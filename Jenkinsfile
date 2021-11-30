@@ -22,7 +22,6 @@ docker-compose build
     stage('Deploy') {
       steps {
         sh '''#!/bin/bash
-docker login -u amtoft -p LtS5fwvhCsh4PL
 docker push amtoft/devops_rest_app
 sudo caprover deploy -i amtoft/devops_rest_app -a rest -n captain-01 -p jonatandahl'''
       }
