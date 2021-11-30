@@ -41,6 +41,7 @@ public class IntegrationTest {
         postPost.setContent("Hello my friend");
         postPost.setImageUrl("https://media.vanityfair.com/photos/5f5156490ca7fe28f9ec3f55/16:9/w_1280,c_limit/feels-good-man-film.jpg");
         postPost.setPostDate(new Date(2020, Calendar.FEBRUARY, 1));
+        postPost.setSubforum("testforum");
         postPost.setUserId(2L);
 
         Post updatePost = new Post();
@@ -48,6 +49,7 @@ public class IntegrationTest {
         updatePost.setContent("Hello my friend");
         updatePost.setImageUrl("https://media.vanityfair.com/photos/5f5156490ca7fe28f9ec3f55/16:9/w_1280,c_limit/feels-good-man-film.jpg");
         updatePost.setPostDate(new Date(2020, Calendar.FEBRUARY, 1));
+        updatePost.setSubforum("testforum");
         updatePost.setUserId(2L);
 
         User u = new User();

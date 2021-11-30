@@ -44,7 +44,7 @@ public class Main {
         app.before(ctx -> {
             ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // TODO
             ctx.header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "*"); // TODO
-            ctx.status(200); // Will be overwritten by exceptions
+            ctx.status(200); // Will be overwritten by REST calls and exceptions
         });
 
         app.get("/user", UserController.fetchByQuery);

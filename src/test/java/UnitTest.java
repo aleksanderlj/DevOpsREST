@@ -105,6 +105,13 @@ public class UnitTest {
         verify(ctx).status(200);
     }
 
+    @Test
+    public void post_FetchBySubforum() throws Exception {
+        when(ctx.pathParam("forum")).thenReturn("the_donald");
+        PostController.fetchBySubforum.handle(ctx);
+        verify(ctx).status(200);
+    }
+
     // User
     @Test
     public void user_FetchByQuery() throws Exception {
@@ -143,6 +150,14 @@ public class UnitTest {
     @Test
     public void user_Delete() throws Exception {
         when(ctx.pathParam("id")).thenReturn("1");
+        when(ctx.header("Authorization")).thenReturn(validJWT);
+        UserController.deleteUser.handle(ctx);
+        verify(ctx).status(200);
+    }
+
+    @Test(expected = NotAuthorizedException.class)
+    public void user_Delete_notAuthorized() throws Exception {
+        when(ctx.pathParam("id")).thenReturn("2");
         when(ctx.header("Authorization")).thenReturn(validJWT);
         UserController.deleteUser.handle(ctx);
         verify(ctx).status(200);
@@ -192,6 +207,15 @@ public class UnitTest {
         LoginData ld = new LoginData();
         ld.setUsername("Username");
         ld.setPassword("Wrong Password");
+        when(ctx.bodyAsClass(LoginData.class)).thenReturn(ld);
+        UserController.login.handle(ctx);
+    }
+
+    @Test(expected = NotAuthorizedException.class)
+    public void user_Login_notAuthorizedEmpty() throws Exception {
+        LoginData ld = new LoginData();
+        ld.setUsername(null);
+        ld.setPassword(null);
         when(ctx.bodyAsClass(LoginData.class)).thenReturn(ld);
         UserController.login.handle(ctx);
     }
@@ -255,7 +279,7 @@ public class UnitTest {
         verify(ctx).status(200);
     }
 
-    // Miscellaneous tests to get more code coverage
+    // Miscellaneous tests to get more code coverage ( ͡° ͜ʖ ͡°)
     @Test
     public void propfile_setProperty() throws Exception {
         PropFile.setProperty("test", "value");
@@ -273,6 +297,7 @@ public class UnitTest {
 
     @Test(expected = Exception.class)
     public void counters_initialize_duplicateError() throws UnknownHostException {
+        CounterDAO.initiateCounters();
         CounterDAO.initiateCounters();
     }
 
