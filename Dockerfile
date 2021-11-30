@@ -2,7 +2,7 @@ FROM maven:3.8.3-openjdk-8
 
 COPY . .
 
-RUN mvn package
+RUN mvn package -DskipTests
 
 EXPOSE 5000
 
