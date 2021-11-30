@@ -37,6 +37,13 @@ public class PostController {
         ctx.status(200);
     };
 
+    public static Handler fetchBySubforum = ctx -> {
+        PostDAO dao = PostDAO.instance();
+        List<Post> posts = dao.getPostsBySubforum(ctx.pathParam("forum"));
+        ctx.json(posts);
+        ctx.status(200);
+    };
+
     public static Handler insertPost = ctx -> {
         PostDAO dao = PostDAO.instance();
         Post post = ctx.bodyAsClass(Post.class);

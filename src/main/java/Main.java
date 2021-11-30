@@ -59,6 +59,7 @@ public class Main {
         app.get("/post", PostController.fetchAll );
         app.get("/post/{id}", PostController.fetchById );
         app.get("/user/{userId}/posts", PostController.fetchByUserId );
+        app.get("/forum/{forum}/posts", PostController.fetchBySubforum );
         app.post("/post", PostController.insertPost );
         app.delete("/post/{id}", PostController.deletePost);
         app.patch("/post", PostController.updatePost);

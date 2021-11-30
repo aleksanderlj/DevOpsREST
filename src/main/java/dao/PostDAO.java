@@ -88,6 +88,27 @@ public class PostDAO {
         return result;
     }
 
+    public List<Post> getPostsBySubforum(String forum) throws UnknownHostException {
+        MongoDatabase db = SingleDinkleMan.instance();
+
+        AggregateIterable<Post> iterable = db.getCollection("posts", Post.class)
+                .aggregate(Arrays.asList(
+                        Aggregates.match(eq("subforum", forum)
+                        ),
+                        Aggregates.lookup(
+                                "likes",
+                                "_id",
+                                "postId",
+                                "likeCount"
+                        ),
+                        Aggregates.addFields(new Field("likeCount", new BasicDBObject("$size", "$likeCount")))
+                ));
+
+        List<Post> result = new ArrayList<Post>();
+        iterable.forEach(doc -> result.add(doc));
+        return result;
+    }
+
     public Long insertPost(Post post) throws UnknownHostException {
         MongoDatabase db = SingleDinkleMan.instance();
 
