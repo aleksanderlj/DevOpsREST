@@ -1,5 +1,7 @@
 package token;
 
+import exception.InvalidPayloadException;
+import exception.NotAuthorizedException;
 import io.jsonwebtoken.*;
 import model.User;
 import util.PropFile;
@@ -37,5 +39,15 @@ public class JWTHandler {
         return Jwts.parser()
                 .setSigningKey(getKey())
                 .parseClaimsJws(token);
+    }
+
+    public static void confirmIdentity(String token, Long id) throws NotAuthorizedException, InvalidPayloadException {
+        if(id == null) {
+            throw new InvalidPayloadException("Invalid payload");
+        }
+        Long jwtId = new Long(JWTHandler.validateAndDecode(token).getBody().get("id").toString());
+        if(!jwtId.equals(id)){
+            throw new NotAuthorizedException("Not authorized to access this resource");
+        }
     }
 }

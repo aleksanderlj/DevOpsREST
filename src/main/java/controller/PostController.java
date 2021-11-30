@@ -1,8 +1,10 @@
 package controller;
 import dao.PostDAO;
+import exception.InvalidPayloadException;
 import io.javalin.http.Handler;
 import io.prometheus.client.Counter;
 import model.Post;
+import token.JWTHandler;
 
 import java.util.Comparator;
 import java.util.List;
@@ -47,6 +49,8 @@ public class PostController {
     public static Handler insertPost = ctx -> {
         PostDAO dao = PostDAO.instance();
         Post post = ctx.bodyAsClass(Post.class);
+        String token = ctx.header("Authorization");
+        JWTHandler.confirmIdentity(token, post.getUserId());
         Long id = dao.insertPost(post);
         posted.inc();
         ctx.json(id);
@@ -55,15 +59,30 @@ public class PostController {
 
     public static Handler deletePost = ctx -> {
         PostDAO dao = PostDAO.instance();
-        long count = dao.deletePost(ctx.pathParam("id"));
-        ctx.json(count);
+        Post post = dao.getPostById(ctx.pathParam("id"));
+        if(post != null) {
+            String token = ctx.header("Authorization");
+            JWTHandler.confirmIdentity(token, post.getUserId());
+            long count = dao.deletePost(ctx.pathParam("id"));
+            ctx.json(count);
+        } else {
+            ctx.json(0);
+        }
         ctx.status(200);
     };
 
     public static Handler updatePost = ctx -> {
         PostDAO dao = PostDAO.instance();
         Post post = ctx.bodyAsClass(Post.class);
-        dao.updatePost(post);
+        String token = ctx.header("Authorization");
+        if(post.getId() == null){
+            throw new InvalidPayloadException("Need post id to update post");
+        }
+        Post oldPost = dao.getPostById(Long.toString(post.getId()));
+        if(oldPost != null) {
+            JWTHandler.confirmIdentity(token, oldPost.getUserId());
+            dao.updatePost(post);
+        }
         ctx.status(200);
     };
 }

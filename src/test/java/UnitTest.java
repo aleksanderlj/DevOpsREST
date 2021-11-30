@@ -52,6 +52,7 @@ public class UnitTest {
         p.setUserId(1L);
         p.setPostDate(Calendar.getInstance().getTime());
         when(ctx.bodyAsClass(Post.class)).thenReturn(p);
+        when(ctx.header("Authorization")).thenReturn(validJWT);
         PostController.insertPost.handle(ctx);
         verify(ctx).status(200);
     }
@@ -69,6 +70,7 @@ public class UnitTest {
         p.setTitle("TestTitleUpdated");
         p.setId(1L);
         p.setPostDate(Calendar.getInstance().getTime());
+        when(ctx.header("Authorization")).thenReturn(validJWT);
         when(ctx.bodyAsClass(Post.class)).thenReturn(p);
         PostController.updatePost.handle(ctx);
         verify(ctx).status(200);
@@ -141,6 +143,7 @@ public class UnitTest {
     @Test
     public void user_Delete() throws Exception {
         when(ctx.pathParam("id")).thenReturn("1");
+        when(ctx.header("Authorization")).thenReturn(validJWT);
         UserController.deleteUser.handle(ctx);
         verify(ctx).status(200);
     }
@@ -151,6 +154,7 @@ public class UnitTest {
         u.setId(1L);
         u.setDisplayName("DiplayNameUpdate");
         when(ctx.bodyAsClass(User.class)).thenReturn(u);
+        when(ctx.header("Authorization")).thenReturn(validJWT);
         UserController.updateUser.handle(ctx);
         verify(ctx).status(200);
     }
@@ -159,6 +163,7 @@ public class UnitTest {
     public void user_Update_noId() throws Exception {
         User u = new User();
         u.setDisplayName("DiplayNameUpdate");
+        when(ctx.header("Authorization")).thenReturn(validJWT);
         when(ctx.bodyAsClass(User.class)).thenReturn(u);
         UserController.updateUser.handle(ctx);
     }

@@ -12,6 +12,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.bson.Document;
 import org.bson.json.JsonObject;
 import org.junit.BeforeClass;
+import token.JWTHandler;
 import util.DateTypeAdapter;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,11 +50,16 @@ public class IntegrationTest {
         updatePost.setPostDate(new Date(2020, Calendar.FEBRUARY, 1));
         updatePost.setUserId(2L);
 
+        User u = new User();
+        u.setId(2L);
+        String validJWT = JWTHandler.generateJwtToken(u);
+
         /* POST */
         HttpPost postRequest = new HttpPost("http://localhost:"+ PORT +"/post");
         String postJson = gson.toJson(postPost);
         StringEntity postEntity = new StringEntity(postJson);
         postRequest.setEntity(postEntity);
+        postRequest.setHeader("Authorization", validJWT);
 
         CloseableHttpResponse postResponse = client.execute(postRequest);
         Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
@@ -74,6 +80,7 @@ public class IntegrationTest {
         String updateJson = gson.toJson(updatePost);
         StringEntity updateEntity = new StringEntity(updateJson);
         updateRequest.setEntity(updateEntity);
+        updateRequest.setHeader("Authorization", validJWT);
 
         CloseableHttpResponse updateResponse = client.execute(updateRequest);
         Assert.assertEquals(200, updateResponse.getStatusLine().getStatusCode());
@@ -96,6 +103,7 @@ public class IntegrationTest {
 
         /* DELETE */
         HttpDelete deleteRequest = new HttpDelete("http://localhost:"+ PORT +"/post/" + postId);
+        deleteRequest.setHeader("Authorization", validJWT);
         HttpResponse deleteResponse = HttpClientBuilder.create().build().execute( deleteRequest );
 
         Assert.assertEquals(200, deleteResponse.getStatusLine().getStatusCode());
@@ -156,6 +164,8 @@ public class IntegrationTest {
         String updateJson = gson.toJson(updateUser);
         StringEntity updateEntity = new StringEntity(updateJson);
         updateRequest.setEntity(updateEntity);
+        String validJWT = JWTHandler.generateJwtToken(updateUser);
+        updateRequest.setHeader("Authorization", validJWT);
 
         CloseableHttpResponse updateResponse = client.execute(updateRequest);
         Assert.assertEquals(200, updateResponse.getStatusLine().getStatusCode());
@@ -203,6 +213,7 @@ public class IntegrationTest {
 
         /* DELETE */
         HttpDelete deleteRequest = new HttpDelete("http://localhost:"+ PORT +"/user/" + userId);
+        deleteRequest.setHeader("Authorization", validJWT);
         HttpResponse deleteResponse = HttpClientBuilder.create().build().execute( deleteRequest );
 
         Assert.assertEquals(200, deleteResponse.getStatusLine().getStatusCode());

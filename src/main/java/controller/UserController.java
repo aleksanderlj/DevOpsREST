@@ -34,6 +34,8 @@ public class UserController {
         filter.setUsername(ctx.queryParam("name"));
 
         List<User> user = dao.getUsersByFilter(filter);
+        user.forEach(u -> u.setPassword(null)); // remove password hash for security
+
         ctx.json(user);
         ctx.status(200);
     };
@@ -41,8 +43,10 @@ public class UserController {
     public static Handler fetchById = ctx -> {
         UserDAO dao = UserDAO.instance();
         User user = dao.getUserById(ctx.pathParam("id"));
-        if(user != null)
+        if(user != null) {
+            user.setPassword(null); // remove password hash for security
             ctx.json(user);
+        }
         ctx.status(200);
     };
 
@@ -75,6 +79,8 @@ public class UserController {
 
     public static Handler deleteUser = ctx -> {
         UserDAO dao = UserDAO.instance();
+        String token = ctx.header("Authorization");
+        JWTHandler.confirmIdentity(token, new Long(ctx.pathParam("id")));
         long count = dao.deleteUser(ctx.pathParam("id"));
         ctx.json(count);
         ctx.status(200);
@@ -83,6 +89,8 @@ public class UserController {
     public static Handler updateUser = ctx -> {
         UserDAO dao = UserDAO.instance();
         User user = ctx.bodyAsClass(User.class);
+        String token = ctx.header("Authorization");
+        JWTHandler.confirmIdentity(token, user.getId());
         if(user.getPassword() != null){
             user.setPassword(PwdAuth.hash(user.getPassword()));
         }
