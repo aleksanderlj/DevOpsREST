@@ -12,6 +12,7 @@ public class Post {
     private Date postDate;
     private String imageUrl;
     private int likeCount;
+    private String subforum;
 
     public Post() {}
 
@@ -61,6 +62,14 @@ public class Post {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getSubforum(){
+        return subforum;
+    }
+
+    public void setSubforum(String subforum) {
+        this.subforum = subforum;
     }
 
     @BsonIgnore // Makes likeCount only show on output
