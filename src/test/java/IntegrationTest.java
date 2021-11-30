@@ -4,10 +4,12 @@ import com.google.gson.reflect.TypeToken;
 import model.LoginData;
 import model.Post;
 import model.User;
+import mongo.SingleDinkleMan;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.bson.Document;
 import org.bson.json.JsonObject;
 import org.junit.BeforeClass;
 import util.DateTypeAdapter;
@@ -18,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -140,7 +143,6 @@ public class IntegrationTest {
         JsonObject hehe = new JsonObject(hej);
         String userId = Long.toString(hehe.toBsonDocument().get("body").asDocument().getInt32("id").getValue());
 
-        System.out.println(userId);
         HttpUriRequest getRequest1 = new HttpGet("http://localhost:"+ PORT +"/user/" + userId);
         HttpResponse getResponse1 = HttpClientBuilder.create().build().execute( getRequest1 );
 
@@ -209,7 +211,9 @@ public class IntegrationTest {
     }
 
     @BeforeClass
-    public static void initializeJavalin() {
+    public static void initializeJavalin() throws UnknownHostException {
+        SingleDinkleMan.instance().getCollection("users").deleteMany(new Document());
+        SingleDinkleMan.instance().getCollection("posts").deleteMany(new Document());
         Main.initializeJavalin(PORT);
     }
 }

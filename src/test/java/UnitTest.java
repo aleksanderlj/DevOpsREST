@@ -11,6 +11,8 @@ import io.javalin.http.Context;
 import model.LoginData;
 import model.Post;
 import model.User;
+import mongo.SingleDinkleMan;
+import org.bson.Document;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,7 +34,9 @@ public class UnitTest {
     private static String validJWT;
 
     @BeforeClass
-    public static void initialize(){
+    public static void initialize() throws UnknownHostException {
+        SingleDinkleMan.instance().getCollection("users").deleteMany(new Document());
+        SingleDinkleMan.instance().getCollection("posts").deleteMany(new Document());
         User u = new User();
         u.setId(1L);
         validJWT = JWTHandler.generateJwtToken(u);
