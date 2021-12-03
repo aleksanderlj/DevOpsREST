@@ -42,7 +42,7 @@ public class Main {
         app.start(port);
 
         app.before(ctx -> {
-            ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "https://downvoted.dk/"); // TODO
+            ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "https://downvoted.dk"); // TODO
             ctx.header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "*"); // TODO
             ctx.status(200); // Will be overwritten by REST calls and exceptions
         });
